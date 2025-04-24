@@ -9,9 +9,11 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/gin-gonic/gin"
 	"github.com/mengbin92/example/config"
+	"github.com/mengbin92/example/lib/cache"
 	"github.com/mengbin92/example/lib/db"
 	"github.com/mengbin92/example/lib/logger"
 	"github.com/mengbin92/example/lib/middleware"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -31,6 +33,18 @@ func run() {
 		panic(err)
 	}
 
+}
+
+func loadRedis() *redis.Client {
+	return cache.GetRedisClient("service", &cache.RedisConfig{
+		Addr:         viper.GetString("redis.addr"),
+		Password:     viper.GetString("redis.password"),
+		DB:           viper.GetInt("redis.db"),
+		PoolSize:     viper.GetInt("redis.pool_size"),
+		DialTimeout:  viper.GetDuration("redis.dial_timeout"),
+		ReadTimeout:  viper.GetDuration("redis.read_timeout"),
+		WriteTimeout: viper.GetDuration("redis.write_timeout"),
+	})
 }
 
 func loadDB() *gorm.DB {
