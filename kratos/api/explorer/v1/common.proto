@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package api.explorer.v1;
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+option go_package = "explorer/api/explorer/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.explorer.v1";
+
+service Basic {
+  rpc Ping(google.protobuf.Empty) returns (PingReply) {
+    option (google.api.http) = {
+      get : "/basic/ping"
+    };
+  }
+}
+
+message Status {
+  int32 code = 1;
+  string message = 2;
+}
+
+message PingReply { Status status = 1; }

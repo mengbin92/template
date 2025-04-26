@@ -5,11 +5,20 @@ server:
   grpc:
     addr: 0.0.0.0:9000
     timeout: 1s
-data:
-  database:
-    driver: mysql
-    source: root:root@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local
-  redis:
-    addr: 127.0.0.1:6379
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+
+database:
+  driver: mysql
+  source: root:Hvrg(CPVYUf^V+Qv@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local
+redis:
+  addr: 127.0.0.1:6379
+  password: ""
+  db: 0
+  pool_size: 100
+  read_timeout: 0.2s
+  write_timeout: 0.2s
+
+auth_config:
+  algorithm: HS256 # HS256 or HS384 or HS512
+  secret: secret
+  token_expire_in_seconds: 300s
+  issuer: explorer

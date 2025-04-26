@@ -3,37 +3,200 @@
 
 openapi: 3.0.3
 info:
-    title: Greeter API
-    description: The greeting service definition.
+    title: ""
     version: 0.0.1
 paths:
-    /helloworld/{name}:
+    /basic/ping:
         get:
             tags:
-                - Greeter
-                - subgroup
-            description: Sends a greeting
-            operationId: Greeter_SayHello
-            parameters:
-                - name: name
-                  in: path
-                  required: true
-                  schema:
-                    type: string
+                - Basic
+            operationId: Basic_Ping
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/helloworld.v1.HelloReply'
+                                $ref: '#/components/schemas/api.explorer.v1.PingReply'
+    /user/v1/delete:
+        post:
+            tags:
+                - User
+            operationId: User_Delete
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.explorer.v1.DeleteUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.DeleteUserReply'
+    /user/v1/login:
+        post:
+            tags:
+                - User
+            operationId: User_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.explorer.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.LoginReply'
+    /user/v1/logout:
+        post:
+            tags:
+                - User
+            operationId: User_Logout
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.LogoutReply'
+    /user/v1/register:
+        post:
+            tags:
+                - User
+            operationId: User_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.explorer.v1.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.RegisterReply'
+    /user/v1/update:
+        post:
+            tags:
+                - User
+            operationId: User_Update
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.explorer.v1.UpdateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.UpdateUserReply'
 components:
     schemas:
-        helloworld.v1.HelloReply:
+        api.explorer.v1.DeleteUserReply:
             type: object
             properties:
+                status:
+                    $ref: '#/components/schemas/api.explorer.v1.Status'
+        api.explorer.v1.DeleteUserRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+        api.explorer.v1.LoginReply:
+            type: object
+            properties:
+                userProfile:
+                    $ref: '#/components/schemas/api.explorer.v1.UserProfile'
+                token:
+                    type: string
+        api.explorer.v1.LoginRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+        api.explorer.v1.LogoutReply:
+            type: object
+            properties:
+                status:
+                    $ref: '#/components/schemas/api.explorer.v1.Status'
+        api.explorer.v1.PingReply:
+            type: object
+            properties:
+                status:
+                    $ref: '#/components/schemas/api.explorer.v1.Status'
+        api.explorer.v1.RegisterReply:
+            type: object
+            properties:
+                userProfile:
+                    $ref: '#/components/schemas/api.explorer.v1.UserProfile'
+                token:
+                    type: string
+        api.explorer.v1.RegisterRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                email:
+                    type: string
+                phone:
+                    type: string
+        api.explorer.v1.Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    format: int32
                 message:
                     type: string
-            description: The response message containing the greetings
+        api.explorer.v1.UpdateUserReply:
+            type: object
+            properties:
+                status:
+                    $ref: '#/components/schemas/api.explorer.v1.Status'
+        api.explorer.v1.UpdateUserRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+                username:
+                    type: string
+                password:
+                    type: string
+                email:
+                    type: string
+                phone:
+                    type: string
+        api.explorer.v1.UserProfile:
+            type: object
+            properties:
+                username:
+                    type: string
+                userId:
+                    type: string
+                permissions:
+                    type: array
+                    items:
+                        type: string
 tags:
-    - name: Greeter
+    - name: Basic
+    - name: User

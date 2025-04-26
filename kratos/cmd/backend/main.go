@@ -1,10 +1,11 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 
-	"kratos/internal/conf"
+	"explorer/internal/conf"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
@@ -74,7 +75,7 @@ func main() {
 		panic(err)
 	}
 
-	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
+	app, cleanup, err := wireApp(context.Background(), &bc, logger)
 	if err != nil {
 		panic(err)
 	}
