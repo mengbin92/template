@@ -62,7 +62,7 @@ func (m *UserManager) Login(ctx context.Context, username, password string, db *
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		m.Logger.Errorf("login user: %s, password: %s, error: %v", username, password, err)
-		return "", errors.Wrap(err,"login user failed")
+		return "", errors.Wrap(err, "login user failed")
 	}
 
 	token, err := m.generateToken(user)
@@ -74,6 +74,28 @@ func (m *UserManager) Login(ctx context.Context, username, password string, db *
 	err = cache.GetRedisClient().Set(ctx, m.generateTokenCacheKey(user.ID), token, m.AuthConfig.TokenExpireInSeconds.AsDuration().Abs()).Err()
 	if err != nil {
 		m.Logger.Errorf("login user: %s token cache error: %v", username, err)
+		return "", errors.Wrap(err, "cache login user token failed")
+	}
+
+	return token, nil
+}
+
+func (m *UserManager) RefreshToken(ctx context.Context, ua *UserAuthentication, db *gorm.DB) (string, error) {
+	user := &User{}
+	if err := db.Where("id = ?", ua.UserID).First(user).Error; err != nil {
+		m.Logger.Errorf("refresh user: %s token error: %v", ua.Username, err)
+		return "", errors.Wrap(err, "refresh user token failed")
+	}
+	
+	token, err := m.generateToken(user)
+	if err != nil {
+		m.Logger.Errorf("refresh user: %s token error: %v", user.Username, err)
+		return "", errors.Wrap(err, "refresh user token failed")
+	}
+
+	err = cache.GetRedisClient().Set(ctx, m.generateTokenCacheKey(user.ID), token, m.AuthConfig.TokenExpireInSeconds.AsDuration().Abs()).Err()
+	if err != nil {
+		m.Logger.Errorf("refresh user: %s token cache error: %v", user.Username, err)
 		return "", errors.Wrap(err, "cache login user token failed")
 	}
 
@@ -115,27 +137,24 @@ func (m *UserManager) Logout(ctx context.Context, id uint) error {
 }
 
 func (m *UserManager) ValidToken(ctx context.Context, tokenStr string) (*UserAuthentication, error) {
-	m.Logger.Infof("get user id from token: %s", tokenStr)
-
 	ua, err := m.loadUserAuthenticationFromToken(ctx, tokenStr)
 	if err != nil {
 		return nil, errors.Wrap(err, "load user authentication from token failed")
 	}
 
-	rdb := cache.GetRedisClient()
-	tokenCacheKey := m.generateTokenCacheKey(ua.UserID)
-	found, err := cache.GetRedisClient().Get(ctx, tokenCacheKey).Result()
-	if err != nil {
-		return nil, errors.Wrap(err, "check user token from cache failed")
-	}
-	if found != tokenStr {
-		return nil, errors.New("token cache not match")
-	}
-
-	// token 续期
-	if rdb.TTL(ctx, tokenCacheKey).Val().Abs() < m.AuthConfig.TokenExpireInSeconds.AsDuration().Abs() {
-		rdb.Expire(ctx, tokenCacheKey, m.AuthConfig.TokenExpireInSeconds.AsDuration().Abs())
-	}
+	// // token 续期
+	// rdb := cache.GetRedisClient()
+	// tokenCacheKey := m.generateTokenCacheKey(ua.UserID)
+	// found, err := cache.GetRedisClient().Get(ctx, tokenCacheKey).Result()
+	// if err != nil {
+	// 	return nil, errors.Wrap(err, "check user token from cache failed")
+	// }
+	// if found != tokenStr {
+	// 	return nil, errors.New("token cache not match")
+	// }
+	// if rdb.TTL(ctx, tokenCacheKey).Val().Abs() < m.AuthConfig.TokenExpireInSeconds.AsDuration().Abs() {
+	// 	rdb.Expire(ctx, tokenCacheKey, m.AuthConfig.TokenExpireInSeconds.AsDuration().Abs())
+	// }
 
 	return ua, nil
 }

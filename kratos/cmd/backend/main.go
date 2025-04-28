@@ -31,6 +31,8 @@ var (
 )
 
 func init() {
+	Version = "v0.0.1"
+	Name = "explorer"
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
 }
 

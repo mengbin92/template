@@ -633,11 +633,12 @@ const file_explorer_v1_user_proto_rawDesc = "" +
 	"\x05email\x18\x04 \x01(\tR\x05email\x12\x14\n" +
 	"\x05phone\x18\x05 \x01(\tR\x05phone\"B\n" +
 	"\x0fUpdateUserReply\x12/\n" +
-	"\x06status\x18\x01 \x01(\v2\x17.api.explorer.v1.StatusR\x06status2\x86\x04\n" +
+	"\x06status\x18\x01 \x01(\v2\x17.api.explorer.v1.StatusR\x06status2\xe8\x04\n" +
 	"\x04User\x12j\n" +
 	"\bRegister\x12 .api.explorer.v1.RegisterRequest\x1a\x1e.api.explorer.v1.RegisterReply\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/user/v1/register\x12^\n" +
-	"\x05Login\x12\x1d.api.explorer.v1.LoginRequest\x1a\x1b.api.explorer.v1.LoginReply\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/user/v1/login\x12Z\n" +
-	"\x06Logout\x12\x16.google.protobuf.Empty\x1a\x1c.api.explorer.v1.LogoutReply\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/user/v1/logout\x12j\n" +
+	"\x05Login\x12\x1d.api.explorer.v1.LoginRequest\x1a\x1b.api.explorer.v1.LoginReply\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/user/v1/login\x12c\n" +
+	"\fRefreshToken\x12\x16.google.protobuf.Empty\x1a\x1b.api.explorer.v1.LoginReply\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/user/v1/refresh_token\x12W\n" +
+	"\x06Logout\x12\x16.google.protobuf.Empty\x1a\x1c.api.explorer.v1.LogoutReply\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/user/v1/logout\x12j\n" +
 	"\x06Update\x12\".api.explorer.v1.UpdateUserRequest\x1a .api.explorer.v1.UpdateUserReply\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/user/v1/update\x12j\n" +
 	"\x06Delete\x12\".api.explorer.v1.DeleteUserRequest\x1a .api.explorer.v1.DeleteUserReply\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/user/v1/deleteB0\n" +
 	"\x0fapi.explorer.v1P\x01Z\x1bexplorer/api/explorer/v1;v1b\x06proto3"
@@ -678,16 +679,18 @@ var file_explorer_v1_user_proto_depIdxs = []int32{
 	11, // 4: api.explorer.v1.UpdateUserReply.status:type_name -> api.explorer.v1.Status
 	1,  // 5: api.explorer.v1.User.Register:input_type -> api.explorer.v1.RegisterRequest
 	3,  // 6: api.explorer.v1.User.Login:input_type -> api.explorer.v1.LoginRequest
-	12, // 7: api.explorer.v1.User.Logout:input_type -> google.protobuf.Empty
-	9,  // 8: api.explorer.v1.User.Update:input_type -> api.explorer.v1.UpdateUserRequest
-	7,  // 9: api.explorer.v1.User.Delete:input_type -> api.explorer.v1.DeleteUserRequest
-	2,  // 10: api.explorer.v1.User.Register:output_type -> api.explorer.v1.RegisterReply
-	4,  // 11: api.explorer.v1.User.Login:output_type -> api.explorer.v1.LoginReply
-	6,  // 12: api.explorer.v1.User.Logout:output_type -> api.explorer.v1.LogoutReply
-	10, // 13: api.explorer.v1.User.Update:output_type -> api.explorer.v1.UpdateUserReply
-	8,  // 14: api.explorer.v1.User.Delete:output_type -> api.explorer.v1.DeleteUserReply
-	10, // [10:15] is the sub-list for method output_type
-	5,  // [5:10] is the sub-list for method input_type
+	12, // 7: api.explorer.v1.User.RefreshToken:input_type -> google.protobuf.Empty
+	12, // 8: api.explorer.v1.User.Logout:input_type -> google.protobuf.Empty
+	9,  // 9: api.explorer.v1.User.Update:input_type -> api.explorer.v1.UpdateUserRequest
+	7,  // 10: api.explorer.v1.User.Delete:input_type -> api.explorer.v1.DeleteUserRequest
+	2,  // 11: api.explorer.v1.User.Register:output_type -> api.explorer.v1.RegisterReply
+	4,  // 12: api.explorer.v1.User.Login:output_type -> api.explorer.v1.LoginReply
+	4,  // 13: api.explorer.v1.User.RefreshToken:output_type -> api.explorer.v1.LoginReply
+	6,  // 14: api.explorer.v1.User.Logout:output_type -> api.explorer.v1.LogoutReply
+	10, // 15: api.explorer.v1.User.Update:output_type -> api.explorer.v1.UpdateUserReply
+	8,  // 16: api.explorer.v1.User.Delete:output_type -> api.explorer.v1.DeleteUserReply
+	11, // [11:17] is the sub-list for method output_type
+	5,  // [5:11] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name

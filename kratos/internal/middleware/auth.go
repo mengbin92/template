@@ -50,7 +50,7 @@ func (m *AuthMiddleware) Handler(ctx context.Context, req interface{}, next midd
 	if err != nil{
 		return nil, errors.Wrap(err, "get user id from token failed")
 	}
-	utils.SetUserAuthenticationToContext(ctx, ua)
+	ctx = utils.SetUserAuthenticationToContext(ctx, ua)
 	return next(ctx, req)
 }
 

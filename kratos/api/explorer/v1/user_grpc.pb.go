@@ -20,11 +20,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	User_Register_FullMethodName = "/api.explorer.v1.User/Register"
-	User_Login_FullMethodName    = "/api.explorer.v1.User/Login"
-	User_Logout_FullMethodName   = "/api.explorer.v1.User/Logout"
-	User_Update_FullMethodName   = "/api.explorer.v1.User/Update"
-	User_Delete_FullMethodName   = "/api.explorer.v1.User/Delete"
+	User_Register_FullMethodName     = "/api.explorer.v1.User/Register"
+	User_Login_FullMethodName        = "/api.explorer.v1.User/Login"
+	User_RefreshToken_FullMethodName = "/api.explorer.v1.User/RefreshToken"
+	User_Logout_FullMethodName       = "/api.explorer.v1.User/Logout"
+	User_Update_FullMethodName       = "/api.explorer.v1.User/Update"
+	User_Delete_FullMethodName       = "/api.explorer.v1.User/Delete"
 )
 
 // UserClient is the client API for User service.
@@ -33,6 +34,7 @@ const (
 type UserClient interface {
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterReply, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginReply, error)
+	RefreshToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*LoginReply, error)
 	Logout(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*LogoutReply, error)
 	Update(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserReply, error)
 	Delete(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserReply, error)
@@ -60,6 +62,16 @@ func (c *userClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.C
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LoginReply)
 	err := c.cc.Invoke(ctx, User_Login_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) RefreshToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*LoginReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginReply)
+	err := c.cc.Invoke(ctx, User_RefreshToken_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +114,7 @@ func (c *userClient) Delete(ctx context.Context, in *DeleteUserRequest, opts ...
 type UserServer interface {
 	Register(context.Context, *RegisterRequest) (*RegisterReply, error)
 	Login(context.Context, *LoginRequest) (*LoginReply, error)
+	RefreshToken(context.Context, *emptypb.Empty) (*LoginReply, error)
 	Logout(context.Context, *emptypb.Empty) (*LogoutReply, error)
 	Update(context.Context, *UpdateUserRequest) (*UpdateUserReply, error)
 	Delete(context.Context, *DeleteUserRequest) (*DeleteUserReply, error)
@@ -120,6 +133,9 @@ func (UnimplementedUserServer) Register(context.Context, *RegisterRequest) (*Reg
 }
 func (UnimplementedUserServer) Login(context.Context, *LoginRequest) (*LoginReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedUserServer) RefreshToken(context.Context, *emptypb.Empty) (*LoginReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
 }
 func (UnimplementedUserServer) Logout(context.Context, *emptypb.Empty) (*LogoutReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
@@ -183,6 +199,24 @@ func _User_Login_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_RefreshToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).RefreshToken(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -255,6 +289,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _User_Login_Handler,
+		},
+		{
+			MethodName: "RefreshToken",
+			Handler:    _User_RefreshToken_Handler,
 		},
 		{
 			MethodName: "Logout",

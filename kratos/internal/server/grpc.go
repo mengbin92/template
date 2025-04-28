@@ -14,7 +14,7 @@ import (
 // NewGRPCServer new a gRPC server.
 func NewGRPCServer(c *conf.Server, basicService *service.BasicService, userService *service.UserService, logger log.Logger) *grpc.Server {
 	authMiddleware := middleware.NewAuthMiddleware(userService.UserManager, logger)
-	
+
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),

@@ -72,6 +72,31 @@ func (s *UserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 		Token: token,
 	}, nil
 }
+
+func (s *UserService) RefreshToken(ctx context.Context, req *emptypb.Empty) (*pb.LoginReply, error) {
+	s.logger.Info("refresh token")
+
+	ua := utils.GetUserAuthenticationFromContext(ctx)
+	if ua == nil {
+		s.logger.Error("refresh user token, user authentication not found")
+		return nil, errors.New("refresh user token, user authentication not found")
+	}
+	token,err := s.UserManager.RefreshToken(ctx, ua, db.Get())
+	if err != nil {
+		s.logger.Errorf("refresh user: %s token error: %v", ua.Username, err)
+		return nil, errors.Wrap(err, "refresh user token failed")
+	}
+
+	return &pb.LoginReply{
+		UserProfile: &pb.UserProfile{
+			Username: ua.Username,
+			Permissions: ua.Permissions,
+			UserId:    uint64(ua.UserID),
+		},
+		Token: token,
+	}, nil
+}
+
 func (s *UserService) Logout(ctx context.Context, req *emptypb.Empty) (*pb.LogoutReply, error) {
 	s.logger.Info("logout user")
 	ua := utils.GetUserAuthenticationFromContext(ctx)

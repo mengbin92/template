@@ -26,10 +26,15 @@ service User {
     };
   }
 
+  rpc RefreshToken(google.protobuf.Empty) returns (LoginReply) {
+    option (google.api.http) = {
+      get : "/user/v1/refresh_token",
+    };
+  }
+
   rpc Logout(google.protobuf.Empty) returns (LogoutReply) {
     option (google.api.http) = {
-      post : "/user/v1/logout",
-      body : "*"
+      get : "/user/v1/logout",
     };
   }
 

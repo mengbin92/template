@@ -18,6 +18,120 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.explorer.v1.PingReply'
+    /chain/v1/get_balance/{address}:
+        get:
+            tags:
+                - Chain
+            operationId: Chain_GetBalance
+            parameters:
+                - name: address
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.GetBalanceReply'
+    /chain/v1/get_block_by_hash/{blockHash}:
+        get:
+            tags:
+                - Chain
+            operationId: Chain_GetBlockByHash
+            parameters:
+                - name: blockHash
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.GetBlockReply'
+    /chain/v1/get_block_by_number/{blockNumber}:
+        get:
+            tags:
+                - Chain
+            operationId: Chain_GetBlockByNumber
+            parameters:
+                - name: blockNumber
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.GetBlockReply'
+    /chain/v1/get_block_number:
+        get:
+            tags:
+                - Chain
+            operationId: Chain_GetBlockNumer
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.GetBlockNumerReply'
+    /chain/v1/get_network_id:
+        get:
+            tags:
+                - Chain
+            operationId: Chain_GetNetworkId
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.GetNetworkIdReply'
+    /chain/v1/get_transaction/{transactionHash}:
+        get:
+            tags:
+                - Chain
+            operationId: Chain_GetTransaction
+            parameters:
+                - name: transactionHash
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.GetTransactionReply'
+    /chain/v1/get_transaction_receipt/{transactionHash}:
+        get:
+            tags:
+                - Chain
+            operationId: Chain_GetTransactionReceipt
+            parameters:
+                - name: transactionHash
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.GetTransactionReceiptReply'
     /user/v1/delete:
         post:
             tags:
@@ -55,14 +169,10 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/api.explorer.v1.LoginReply'
     /user/v1/logout:
-        post:
+        get:
             tags:
                 - User
             operationId: User_Logout
-            requestBody:
-                content:
-                    application/json: {}
-                required: true
             responses:
                 "200":
                     description: OK
@@ -70,6 +180,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.explorer.v1.LogoutReply'
+    /user/v1/refresh_token:
+        get:
+            tags:
+                - User
+            operationId: User_RefreshToken
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.explorer.v1.LoginReply'
     /user/v1/register:
         post:
             tags:
@@ -117,6 +239,48 @@ components:
             type: object
             properties:
                 userId:
+                    type: string
+        api.explorer.v1.GetBalanceReply:
+            type: object
+            properties:
+                status:
+                    $ref: '#/components/schemas/api.explorer.v1.Status'
+                balance:
+                    type: string
+        api.explorer.v1.GetBlockNumerReply:
+            type: object
+            properties:
+                status:
+                    $ref: '#/components/schemas/api.explorer.v1.Status'
+                blockNumber:
+                    type: string
+        api.explorer.v1.GetBlockReply:
+            type: object
+            properties:
+                status:
+                    $ref: '#/components/schemas/api.explorer.v1.Status'
+                block:
+                    type: string
+        api.explorer.v1.GetNetworkIdReply:
+            type: object
+            properties:
+                status:
+                    $ref: '#/components/schemas/api.explorer.v1.Status'
+                networkId:
+                    type: string
+        api.explorer.v1.GetTransactionReceiptReply:
+            type: object
+            properties:
+                status:
+                    $ref: '#/components/schemas/api.explorer.v1.Status'
+                transactionReceipt:
+                    type: string
+        api.explorer.v1.GetTransactionReply:
+            type: object
+            properties:
+                status:
+                    $ref: '#/components/schemas/api.explorer.v1.Status'
+                transaction:
                     type: string
         api.explorer.v1.LoginReply:
             type: object
@@ -199,4 +363,5 @@ components:
                         type: string
 tags:
     - name: Basic
+    - name: Chain
     - name: User

@@ -23,6 +23,7 @@ const _ = http.SupportPackageIsVersion1
 const OperationUserDelete = "/api.explorer.v1.User/Delete"
 const OperationUserLogin = "/api.explorer.v1.User/Login"
 const OperationUserLogout = "/api.explorer.v1.User/Logout"
+const OperationUserRefreshToken = "/api.explorer.v1.User/RefreshToken"
 const OperationUserRegister = "/api.explorer.v1.User/Register"
 const OperationUserUpdate = "/api.explorer.v1.User/Update"
 
@@ -30,6 +31,7 @@ type UserHTTPServer interface {
 	Delete(context.Context, *DeleteUserRequest) (*DeleteUserReply, error)
 	Login(context.Context, *LoginRequest) (*LoginReply, error)
 	Logout(context.Context, *emptypb.Empty) (*LogoutReply, error)
+	RefreshToken(context.Context, *emptypb.Empty) (*LoginReply, error)
 	Register(context.Context, *RegisterRequest) (*RegisterReply, error)
 	Update(context.Context, *UpdateUserRequest) (*UpdateUserReply, error)
 }
@@ -38,7 +40,8 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r := s.Route("/")
 	r.POST("/user/v1/register", _User_Register0_HTTP_Handler(srv))
 	r.POST("/user/v1/login", _User_Login0_HTTP_Handler(srv))
-	r.POST("/user/v1/logout", _User_Logout0_HTTP_Handler(srv))
+	r.GET("/user/v1/refresh_token", _User_RefreshToken0_HTTP_Handler(srv))
+	r.GET("/user/v1/logout", _User_Logout0_HTTP_Handler(srv))
 	r.POST("/user/v1/update", _User_Update0_HTTP_Handler(srv))
 	r.POST("/user/v1/delete", _User_Delete0_HTTP_Handler(srv))
 }
@@ -87,12 +90,28 @@ func _User_Login0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error 
 	}
 }
 
+func _User_RefreshToken0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in emptypb.Empty
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserRefreshToken)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RefreshToken(ctx, req.(*emptypb.Empty))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*LoginReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _User_Logout0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in emptypb.Empty
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
@@ -157,6 +176,7 @@ type UserHTTPClient interface {
 	Delete(ctx context.Context, req *DeleteUserRequest, opts ...http.CallOption) (rsp *DeleteUserReply, err error)
 	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginReply, err error)
 	Logout(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *LogoutReply, err error)
+	RefreshToken(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *LoginReply, err error)
 	Register(ctx context.Context, req *RegisterRequest, opts ...http.CallOption) (rsp *RegisterReply, err error)
 	Update(ctx context.Context, req *UpdateUserRequest, opts ...http.CallOption) (rsp *UpdateUserReply, err error)
 }
@@ -198,10 +218,23 @@ func (c *UserHTTPClientImpl) Login(ctx context.Context, in *LoginRequest, opts .
 func (c *UserHTTPClientImpl) Logout(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*LogoutReply, error) {
 	var out LogoutReply
 	pattern := "/user/v1/logout"
-	path := binding.EncodeURL(pattern, in, false)
+	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserLogout))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *UserHTTPClientImpl) RefreshToken(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*LoginReply, error) {
+	var out LoginReply
+	pattern := "/user/v1/refresh_token"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserRefreshToken))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
