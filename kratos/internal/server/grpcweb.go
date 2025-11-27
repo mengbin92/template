@@ -4,6 +4,7 @@ package server
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"explorer/internal/conf"
 
@@ -113,9 +114,23 @@ func NewGRPCWebServer(c *conf.Server, grpcServer *krpc.Server, logger log.Logger
 		}
 	}
 
+	// Configure server timeouts for security and resource management
+	readTimeout := 30 * time.Second  // Default read timeout
+	writeTimeout := 30 * time.Second // Default write timeout
+	idleTimeout := 120 * time.Second // Default idle timeout
+
+	if c.GrpcWeb != nil && c.GrpcWeb.Timeout != nil {
+		timeout := c.GrpcWeb.Timeout.AsDuration()
+		readTimeout = timeout
+		writeTimeout = timeout
+	}
+
 	srv := &http.Server{
 		Addr:    addr,
 		Handler: handler,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+		IdleTimeout:  idleTimeout,
 	}
 
 	corsEnabled := c.GrpcWeb != nil && c.GrpcWeb.EnableCors
