@@ -18,17 +18,30 @@ import (
 )
 
 // DemoService implements the demo API service.
+// It provides methods for demo functionality including hello messages and health checks.
 type DemoService struct {
 	pb.UnimplementedDemoServer
 }
 
 // NewDemoService creates a new instance of DemoService.
+//
+// Returns:
+//   - *DemoService: A new service instance
 func NewDemoService() *DemoService {
 	return &DemoService{}
 }
 
 // GetHello returns a hello message.
+//
+// Parameters:
+//   - ctx: Context for request cancellation and timeout
+//   - req: Request containing the name parameter
+//
+// Returns:
+//   - *pb.Reply: Response containing the hello message
+//   - error: Error if the operation fails or validation fails
 func (s *DemoService) GetHello(ctx context.Context, req *pb.GetHelloRequest) (*pb.Reply, error) {
+	// Input validation
 	if req == nil {
 		return s.errorReply(http.StatusBadRequest, "request cannot be nil", errors.New("nil request")), errors.New("nil request")
 	}
@@ -47,6 +60,16 @@ func (s *DemoService) GetHello(ctx context.Context, req *pb.GetHelloRequest) (*p
 }
 
 // CheckHealthy performs a health check on the service and its dependencies.
+// This endpoint can be used by load balancers, monitoring systems, and clients
+// to verify that the service is operational.
+//
+// Parameters:
+//   - ctx: Context for request cancellation and timeout
+//   - req: Health check request (optional service name)
+//
+// Returns:
+//   - *pb.CheckHealthyResponse: Health status information
+//   - error: Error if the health check fails critically
 func (s *DemoService) CheckHealthy(ctx context.Context, req *pb.CheckHealthyRequest) (*pb.CheckHealthyResponse, error) {
 	global.Logger.Debugf("health check requested: service=%s", req.GetService())
 
@@ -142,7 +165,16 @@ func (s *DemoService) CheckHealthy(ctx context.Context, req *pb.CheckHealthyRequ
 	return response, nil
 }
 
-// errorReply creates a standardized error reply.
+// errorReply creates a standardized error reply with sanitized error messages.
+// This function ensures that sensitive information is not exposed to clients.
+//
+// Parameters:
+//   - code: HTTP status code
+//   - message: Error message prefix (user-friendly message)
+//   - err: The underlying error (may contain sensitive information)
+//
+// Returns:
+//   - *pb.Reply: A reply with sanitized error information
 func (s *DemoService) errorReply(code int, message string, err error) *pb.Reply {
 	return &pb.Reply{
 		Code:    int32(code),
@@ -151,6 +183,15 @@ func (s *DemoService) errorReply(code int, message string, err error) *pb.Reply 
 }
 
 // marshalAndReply serializes the value and returns a success reply.
+// The value is converted to google.protobuf.Struct, allowing direct JSON object response.
+//
+// Parameters:
+//   - v: The value to marshal
+//   - errorMsg: Error message prefix if marshaling fails
+//
+// Returns:
+//   - *pb.Reply: Success reply with data as Struct, or error reply if marshaling fails
+//   - error: Error if marshaling fails
 func (s *DemoService) marshalAndReply(v interface{}, errorMsg string) (*pb.Reply, error) {
 	jsonBytes, err := sonic.Marshal(v)
 	if err != nil {

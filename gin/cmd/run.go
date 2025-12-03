@@ -1,8 +1,11 @@
+// Package cmd provides command-line interface for the application.
+// It handles server initialization, configuration loading, and HTTP server setup.
 package cmd
 
 import (
 	"fmt"
 	"html/template"
+	"os"
 	"strconv"
 	"time"
 
@@ -18,49 +21,82 @@ import (
 	"gorm.io/gorm"
 )
 
+// Execute is the main entry point for the command-line interface.
+// It loads configuration and starts the HTTP server.
+//
+// The function will panic if critical initialization steps fail:
+//   - Configuration loading fails
+//   - Server startup fails
 func Execute() {
-	// TODO: implement
-
-	// 初始化配置
+	// Load configuration
 	config.LoadConfig()
 
 	run()
 }
 
+// run initializes the database connection and starts the HTTP server.
+//
+// The function will panic if:
+//   - Database initialization fails
+//   - Server startup fails
 func run() {
-	if err := setEngine(loadDB()).Run(fmt.Sprintf(":%d", viper.GetInt("server.port"))); err != nil {
+	dbInstance := loadDB()
+	engine := setEngine(dbInstance)
+
+	addr := fmt.Sprintf(":%d", viper.GetInt("server.port"))
+	if err := engine.Run(addr); err != nil {
 		log.Error("Failed to run server: ", err)
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Failed to run server: %v\n", err)
+		os.Exit(1)
 	}
-
 }
 
-func loadRedis() *redis.Client {
-	return cache.GetRedisClient("service", &cache.RedisConfig{
-		Addr:         viper.GetString("redis.addr"),
-		Password:     viper.GetString("redis.password"),
-		DB:           viper.GetInt("redis.db"),
-		PoolSize:     viper.GetInt("redis.pool_size"),
-		DialTimeout:  viper.GetDuration("redis.dial_timeout"),
-		ReadTimeout:  viper.GetDuration("redis.read_timeout"),
-		WriteTimeout: viper.GetDuration("redis.write_timeout"),
-	})
+// loadRedis initializes and returns a Redis client instance.
+//
+// Parameters:
+//   - name: The name identifier for the Redis client instance
+//   - cfg: Redis configuration containing address, password, database, and pool settings
+//
+// Returns:
+//   - *redis.Client: A configured Redis client instance
+func loadRedis(name string, cfg *cache.RedisConfig) *redis.Client {
+	return cache.GetRedisClient(name, cfg)
 }
 
+// loadDB initializes the database connection and returns the GORM database instance.
+//
+// Returns:
+//   - *gorm.DB: The GORM database instance
+//
+// The function will panic if:
+//   - Database initialization fails
+//   - Database connection fails
 func loadDB() *gorm.DB {
-	err := db.Init(viper.GetString("database.driver"), viper.GetString("database.source"))
-	if err != nil {
+	driver := viper.GetString("database.driver")
+	source := viper.GetString("database.source")
+
+	if err := db.Init(driver, source); err != nil {
 		log.Error("Failed to connect to database: ", err)
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Failed to connect to database: %v\n", err)
+		os.Exit(1)
 	}
+
 	return db.Get()
 }
 
+// setEngine creates and configures a new Gin HTTP server engine.
+// It sets up middleware, custom template functions, and routes.
+//
+// Parameters:
+//   - db: The GORM database instance to inject into the request context
+//
+// Returns:
+//   - *gin.Engine: A configured Gin engine ready to handle HTTP requests
 func setEngine(db *gorm.DB) *gin.Engine {
 	gin.SetMode(viper.GetString("server.mode"))
 	r := gin.New()
 
-	// 注册自定义模板函数
+	// Register custom template functions
 	r.SetFuncMap(template.FuncMap{
 		"formatUnixTime": func(ts string) string {
 			timestamp, err := strconv.ParseInt(ts, 10, 64)
@@ -71,13 +107,18 @@ func setEngine(db *gorm.DB) *gin.Engine {
 		},
 	})
 
-	// 设置中间件
+	// Setup middleware
 	r.Use(gin.Recovery())
-	r.Use(middleware.SetLoggerMiddleware(logger.DefaultLogger(viper.GetInt("log.level"), viper.GetString("log.format"))))
-	r.Use(middleware.SetDBMiddleware(db))
-	r.Use(middleware.SetLogMiddleware(logger.DefaultLogger(viper.GetInt("log.level"), viper.GetString("log.format"))))
 
-	//设置路由
+	logLevel := viper.GetInt("log.level")
+	logFormat := viper.GetString("log.format")
+	zapLogger := logger.DefaultLogger(logLevel, logFormat)
+
+	r.Use(middleware.SetLoggerMiddleware(zapLogger))
+	r.Use(middleware.SetDBMiddleware(db))
+	r.Use(middleware.SetLogMiddleware(zapLogger))
+
+	// Setup routes
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
@@ -87,6 +128,13 @@ func setEngine(db *gorm.DB) *gin.Engine {
 	return r
 }
 
+// formatUnixTime formats a Unix timestamp to a human-readable date-time string.
+//
+// Parameters:
+//   - ts: Unix timestamp in seconds
+//
+// Returns:
+//   - string: Formatted date-time string in "2006-01-02 15:04:05" format
 func formatUnixTime(ts int64) string {
 	return time.Unix(ts, 0).Format("2006-01-02 15:04:05")
 }

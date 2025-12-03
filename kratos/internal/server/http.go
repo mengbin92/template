@@ -13,12 +13,26 @@ import (
 )
 
 // NewHTTPServer creates and configures a new HTTP server instance.
+// It sets up middleware, network configuration, address, and timeout from the provided configuration.
+// The server registers the demo service HTTP handler.
+//
+// Parameters:
+//   - c: Server configuration containing HTTP settings
+//   - logger: Logger instance for server logging
+//
+// Returns:
+//   - *khttp.Server: A configured HTTP server ready to accept connections
 func NewHTTPServer(c *conf.Server, logger log.Logger) *khttp.Server {
-	// Configure CORS
+	// Configure CORS with security best practices
+	// Security: CORS configuration must follow browser security rules:
+	// - If AllowedOrigins contains "*", AllowCredentials must be false
+	// - If AllowCredentials is true, AllowedOrigins must specify exact origins (not "*")
 	var corsOpts []handlers.CORSOption
-	allowedOrigins := []string{"*"}
-	allowCredentials := false
+	allowedOrigins := []string{"*"} // Default: allow all origins
+	allowCredentials := false       // Default: disabled for security when using "*"
 
+	// Security: If using "*" origin, credentials must be disabled
+	// This prevents CORS security vulnerabilities
 	if len(allowedOrigins) == 1 && allowedOrigins[0] == "*" {
 		allowCredentials = false
 	}
@@ -30,8 +44,10 @@ func NewHTTPServer(c *conf.Server, logger log.Logger) *khttp.Server {
 			"Content-Type",
 			"Authorization",
 			"X-Requested-With",
+			// Note: Accept, Origin, and Access-Control-Request-* headers are simple headers
+			// and don't need to be explicitly allowed
 		}),
-		handlers.MaxAge(86400),
+		handlers.MaxAge(86400), // Cache preflight requests for 24 hours
 	)
 
 	if allowCredentials {
@@ -44,8 +60,12 @@ func NewHTTPServer(c *conf.Server, logger log.Logger) *khttp.Server {
 		),
 	}
 
+	// Create CORS middleware factory (reusable)
+	// This creates a single CORS middleware function that can wrap any handler
 	corsMiddleware := handlers.CORS(corsOpts...)
 
+	// Add CORS filter
+	// This ensures CORS headers are applied to all responses
 	opts = append(opts, khttp.Filter(corsMiddleware))
 
 	if c.Http.Network != "" {

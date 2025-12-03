@@ -9,6 +9,14 @@ import (
 	"gorm.io/gorm"
 )
 
+// SetDBMiddleware creates a middleware that injects a GORM database instance into the request context.
+// The database can be retrieved later using factory.DB(ctx).
+//
+// Parameters:
+//   - db: The GORM database instance to inject into the context
+//
+// Returns:
+//   - gin.HandlerFunc: A Gin middleware function that adds database to context
 func SetDBMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := ctx.Request
@@ -17,6 +25,14 @@ func SetDBMiddleware(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// SetRedisMiddleware creates a middleware that injects a Redis client into the request context.
+// The Redis client can be retrieved later using factory.Redis(ctx).
+//
+// Parameters:
+//   - redis: The Redis client instance to inject into the context
+//
+// Returns:
+//   - gin.HandlerFunc: A Gin middleware function that adds Redis client to context
 func SetRedisMiddleware(redis *redis.Client) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := ctx.Request

@@ -24,9 +24,13 @@ import (
 )
 
 // Build-time variables set via ldflags.
+// Example: go build -ldflags "-X main.Version=x.y.z -X main.Name=kratos-project-template"
 var (
-	Name     string
-	Version  string
+	// Name is the name of the compiled software.
+	Name string
+	// Version is the version of the compiled software.
+	Version string
+	// flagconf is the config flag for specifying the configuration file path.
 	flagconf string
 
 	id, _ = os.Hostname()
@@ -36,6 +40,15 @@ func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
 }
 
+// newApp creates a new kratos application with the given logger and servers.
+//
+// Parameters:
+//   - logger: The logger instance for application logging
+//   - gs: The gRPC server instance
+//   - hs: The HTTP server instance
+//
+// Returns:
+//   - *kratos.App: A configured kratos application ready to run
 func newApp(logger log.Logger, gs *grpc.Server, hs *khttp.Server) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
@@ -50,13 +63,32 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *khttp.Server) *kratos.App {
 	)
 }
 
+// main is the entry point of the application.
+// It loads configuration, initializes global variables, sets up logging,
+// and starts the application servers.
+//
+// The function will panic if critical initialization steps fail:
+//   - Configuration loading fails
+//   - Application wiring fails
+//   - Application startup fails
 func main() {
 	flag.Parse()
 
+	// Configure configuration sources with priority order
+	// Priority: env.NewSource (highest) > file.NewSource (lowest)
+	// This means environment variables will override values from config file
+	//
+	// Note: Kratos config system supports environment variable override using dot-notation:
+	//   - SERVER_HTTP_ADDR overrides server.http.addr
+	//   - DATA_DATABASE_SOURCE overrides data.database.source
+	//   - REDIS_ADDR overrides data.redis.addr
+	//
+	// The YAML placeholder syntax (${VAR:default}) in config.yaml may not be supported
+	// by Kratos file source. Use environment variables with dot-notation instead.
 	c := config.New(
 		config.WithSource(
-			file.NewSource(flagconf),
-			env.NewSource(""),
+			file.NewSource(flagconf), // Load config file first (lower priority)
+			env.NewSource(""),        // Environment variables override file config (higher priority)
 		),
 	)
 	defer c.Close()
@@ -74,6 +106,9 @@ func main() {
 
 	logger := logger.NewZapLogger(bc.Log)
 
+	// Add fixed fields to logger
+	// Note: trace.id and span.id are not added here as they are context-dependent
+	// and should be added via middleware during request processing
 	logger = logger.With(
 		zap.String("service.id", id),
 		zap.String("service.name", Name),

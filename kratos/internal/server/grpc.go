@@ -12,6 +12,15 @@ import (
 )
 
 // NewGRPCServer creates and configures a new gRPC server instance.
+// It sets up middleware, network configuration, address, and timeout from the provided configuration.
+// The server registers the demo service implementation.
+//
+// Parameters:
+//   - c: Server configuration containing gRPC settings
+//   - logger: Logger instance for server logging
+//
+// Returns:
+//   - *grpc.Server: A configured gRPC server ready to accept connections
 func NewGRPCServer(c *conf.Server, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
