@@ -3,30 +3,20 @@
 
 openapi: 3.0.3
 info:
-    title: ""
+    title: Demo API
+    description: Demo service provides example API endpoints
     version: 0.0.1
 paths:
-    /basic/ping:
+    /demo/health:
         get:
             tags:
-                - Basic
-            operationId: Basic_Ping
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.PingReply'
-    /chain/v1/get_balance/{address}:
-        get:
-            tags:
-                - Chain
-            operationId: Chain_GetBalance
+                - Demo
+            description: Health check endpoint
+            operationId: Demo_CheckHealthy
             parameters:
-                - name: address
-                  in: path
-                  required: true
+                - name: service
+                  in: query
+                  description: 'Optional: service name to check'
                   schema:
                     type: string
             responses:
@@ -35,16 +25,16 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.explorer.v1.GetBalanceReply'
-    /chain/v1/get_block_by_hash/{blockHash}:
+                                $ref: '#/components/schemas/api.demo.v1.CheckHealthyResponse'
+    /demo/hello:
         get:
             tags:
-                - Chain
-            operationId: Chain_GetBlockByHash
+                - Demo
+            description: GetHello returns a hello message
+            operationId: Demo_GetHello
             parameters:
-                - name: blockHash
-                  in: path
-                  required: true
+                - name: name
+                  in: query
                   schema:
                     type: string
             responses:
@@ -53,315 +43,54 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.explorer.v1.GetBlockReply'
-    /chain/v1/get_block_by_number/{blockNumber}:
-        get:
-            tags:
-                - Chain
-            operationId: Chain_GetBlockByNumber
-            parameters:
-                - name: blockNumber
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.GetBlockReply'
-    /chain/v1/get_block_number:
-        get:
-            tags:
-                - Chain
-            operationId: Chain_GetBlockNumer
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.GetBlockNumerReply'
-    /chain/v1/get_network_id:
-        get:
-            tags:
-                - Chain
-            operationId: Chain_GetNetworkId
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.GetNetworkIdReply'
-    /chain/v1/get_transaction/{transactionHash}:
-        get:
-            tags:
-                - Chain
-            operationId: Chain_GetTransaction
-            parameters:
-                - name: transactionHash
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.GetTransactionReply'
-    /chain/v1/get_transaction_receipt/{transactionHash}:
-        get:
-            tags:
-                - Chain
-            operationId: Chain_GetTransactionReceipt
-            parameters:
-                - name: transactionHash
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.GetTransactionReceiptReply'
-    /user/v1/delete:
-        post:
-            tags:
-                - User
-            operationId: User_Delete
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.explorer.v1.DeleteUserRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.DeleteUserReply'
-    /user/v1/login:
-        post:
-            tags:
-                - User
-            operationId: User_Login
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.explorer.v1.LoginRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.LoginReply'
-    /user/v1/logout:
-        get:
-            tags:
-                - User
-            operationId: User_Logout
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.LogoutReply'
-    /user/v1/refresh_token:
-        get:
-            tags:
-                - User
-            operationId: User_RefreshToken
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.LoginReply'
-    /user/v1/register:
-        post:
-            tags:
-                - User
-            operationId: User_Register
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.explorer.v1.RegisterRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.RegisterReply'
-    /user/v1/update:
-        post:
-            tags:
-                - User
-            operationId: User_Update
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.explorer.v1.UpdateUserRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.explorer.v1.UpdateUserReply'
+                                $ref: '#/components/schemas/api.demo.v1.Reply'
 components:
     schemas:
-        api.explorer.v1.DeleteUserReply:
+        api.demo.v1.CheckHealthyResponse:
             type: object
             properties:
                 status:
-                    $ref: '#/components/schemas/api.explorer.v1.Status'
-        api.explorer.v1.DeleteUserRequest:
-            type: object
-            properties:
-                userId:
                     type: string
-        api.explorer.v1.GetBalanceReply:
-            type: object
-            properties:
-                status:
-                    $ref: '#/components/schemas/api.explorer.v1.Status'
-                balance:
+                    description: 'Health status: "healthy", "degraded", "unhealthy"'
+                service:
                     type: string
-        api.explorer.v1.GetBlockNumerReply:
-            type: object
-            properties:
-                status:
-                    $ref: '#/components/schemas/api.explorer.v1.Status'
-                blockNumber:
+                    description: Service name
+                timestamp:
                     type: string
-        api.explorer.v1.GetBlockReply:
+                    description: Timestamp of the health check
+                details:
+                    type: object
+                    additionalProperties:
+                        $ref: '#/components/schemas/api.demo.v1.HealthDetails'
+                    description: Health details for each component (database, redis, etc.)
+            description: CheckHealthyResponse contains the health status of the service
+        api.demo.v1.HealthDetails:
             type: object
             properties:
                 status:
-                    $ref: '#/components/schemas/api.explorer.v1.Status'
-                block:
                     type: string
-        api.explorer.v1.GetNetworkIdReply:
-            type: object
-            properties:
-                status:
-                    $ref: '#/components/schemas/api.explorer.v1.Status'
-                networkId:
+                    description: 'Component status: "healthy", "unhealthy", "unavailable", "not_configured"'
+                error:
                     type: string
-        api.explorer.v1.GetTransactionReceiptReply:
-            type: object
-            properties:
-                status:
-                    $ref: '#/components/schemas/api.explorer.v1.Status'
-                transactionReceipt:
-                    type: string
-        api.explorer.v1.GetTransactionReply:
-            type: object
-            properties:
-                status:
-                    $ref: '#/components/schemas/api.explorer.v1.Status'
-                transaction:
-                    type: string
-        api.explorer.v1.LoginReply:
-            type: object
-            properties:
-                userProfile:
-                    $ref: '#/components/schemas/api.explorer.v1.UserProfile'
-                token:
-                    type: string
-        api.explorer.v1.LoginRequest:
-            type: object
-            properties:
-                username:
-                    type: string
-                password:
-                    type: string
-        api.explorer.v1.LogoutReply:
-            type: object
-            properties:
-                status:
-                    $ref: '#/components/schemas/api.explorer.v1.Status'
-        api.explorer.v1.PingReply:
-            type: object
-            properties:
-                status:
-                    $ref: '#/components/schemas/api.explorer.v1.Status'
-        api.explorer.v1.RegisterReply:
-            type: object
-            properties:
-                userProfile:
-                    $ref: '#/components/schemas/api.explorer.v1.UserProfile'
-                token:
-                    type: string
-        api.explorer.v1.RegisterRequest:
-            type: object
-            properties:
-                username:
-                    type: string
-                password:
-                    type: string
-                email:
-                    type: string
-                phone:
-                    type: string
-        api.explorer.v1.Status:
+                    description: Optional error message if component is unhealthy
+                latencyMs:
+                    type: number
+                    description: Optional latency in milliseconds
+                    format: double
+            description: HealthDetails contains detailed health information for each component
+        api.demo.v1.Reply:
             type: object
             properties:
                 code:
                     type: integer
+                    description: Response status code, 0 indicates success, non-zero indicates failure
                     format: int32
                 message:
                     type: string
-        api.explorer.v1.UpdateUserReply:
-            type: object
-            properties:
-                status:
-                    $ref: '#/components/schemas/api.explorer.v1.Status'
-        api.explorer.v1.UpdateUserRequest:
-            type: object
-            properties:
-                userId:
-                    type: string
-                username:
-                    type: string
-                password:
-                    type: string
-                email:
-                    type: string
-                phone:
-                    type: string
-        api.explorer.v1.UserProfile:
-            type: object
-            properties:
-                username:
-                    type: string
-                userId:
-                    type: string
-                permissions:
-                    type: array
-                    items:
-                        type: string
+                    description: Response message
+                data:
+                    type: object
+                    description: Response data (using Struct type, can directly return JSON object)
+            description: Common response structure
 tags:
-    - name: Basic
-    - name: Chain
-    - name: User
+    - name: Demo

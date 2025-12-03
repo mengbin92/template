@@ -1,15 +1,14 @@
 syntax = "proto3";
 package kratos.api;
 
-option go_package = "explorer/internal/conf;conf";
+option go_package = "kratos-project-template/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 
 message Bootstrap {
   Server server = 1;
-  Database database = 2;
-  Redis redis = 3;
-  AuthConfig auth_config = 4;
+  Data data = 2;
+  Log log = 3;
 }
 
 message Server {
@@ -23,37 +22,43 @@ message Server {
     string addr = 2;
     google.protobuf.Duration timeout = 3;
   }
-  message GRPC_WEB {
-    string network = 1;
-    string addr = 2;
-    google.protobuf.Duration timeout = 3;
-    // Enable CORS for gRPC-Web
-    bool enable_cors = 4;
-    // Allowed origins for CORS (comma-separated, "*" for all)
-    repeated string allowed_origins = 5;
-  }
   HTTP http = 1;
   GRPC grpc = 2;
-  GRPC_WEB grpc_web = 3;
 }
 
-message Database {
-  string driver = 1;
-  string source = 2;
+message Data {
+  message Database {
+    string driver = 1;
+    string source = 2;
+  }
+  message Redis {
+    string addr = 1;
+    string password = 2;
+    int32 db = 3;
+    int32 pool_size = 4;
+    google.protobuf.Duration read_timeout = 5;
+    google.protobuf.Duration write_timeout = 6;
+  }
+  message ObjectStorage {
+    string provider = 1;          // "s3", "oss", "cos", "minio"
+    string endpoint = 2;          // Object storage endpoint
+    string access_key_id = 3;     // Access key ID
+    string secret_access_key = 4; // Secret access key
+    string bucket_name = 5;       // Bucket name
+    string region = 6;            // Region (required for S3/OSS)
+    bool use_ssl = 7;             // Use SSL
+    string path_prefix = 8;       // Path prefix, e.g., "data/"
+    bool enabled = 9;             // Enable object storage (default false)
+  }
+  Database database = 1;
+  Redis redis = 2;
+  ObjectStorage object_storage = 3;
 }
 
-message Redis {
-  string addr = 1;
-  string password = 2;
-  int32 db = 3;
-  int32 pool_size = 4;
-  google.protobuf.Duration read_timeout = 5;
-  google.protobuf.Duration write_timeout = 6;
-}
-
-message AuthConfig {
-  string algorithm = 1;
-  string secret_key = 2;
-  google.protobuf.Duration token_expire_in_seconds = 3;
-  string issuer = 4;
+message Log {
+  // Log level: debug(-1), info(0), warn(1), error(2), dpanic(3), panic(4),
+  // fatal(5)
+  int32 level = 1;
+  // Log format: json or console
+  string format = 2;
 }

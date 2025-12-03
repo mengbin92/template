@@ -1,0 +1,81 @@
+services:
+  app:
+    build: .
+    ports:
+      - 8000:8000
+      - 9000:9000
+    volumes:
+      - ./configs:/data/conf
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - demo-project-network
+
+  envoy:
+    image: envoyproxy/envoy:v1.36-latest
+    container_name: demo-project-envoy
+    restart: unless-stopped
+    ports:
+      - 9001:9001  # grpc-web 端口
+      - 9901:9901  # Envoy admin 端口
+    volumes:
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    networks:
+      - demo-project-network
+    depends_on:
+      - app
+    command: /usr/local/bin/envoy -c /etc/envoy/envoy.yaml --service-cluster envoy --service-node envoy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:9901/server_info || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  mysql:
+    image: mysql:8.0
+    container_name: demo-project-mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=jKBrZHGcsNG5fMc52EWz
+      - MYSQL_DATABASE=demo_project
+      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
+      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - demo-project-network
+
+  redis:
+    image: redis:latest
+    container_name: demo-project-redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - demo-project-network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  demo-project-network:
+    driver: bridge

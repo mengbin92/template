@@ -1,12 +1,8 @@
 GOHOSTOS:=$(shell go env GOHOSTOS)
 GOPATH:=$(shell go env GOPATH)
-VERSION=$(shell git describe --tags --always)
+VERSION=$(shell git describe --tags --always 2>/dev/null || echo "dev")
 
 ifeq ($(GOHOSTOS), windows)
-	#the `find.exe` is different from `find` in bash/shell.
-	#to see https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/find.
-	#changed to use git-bash.exe to run find cli or other cli friendly, caused of every developer has a Git.
-	#Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
 	Git_Bash=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell where git))))
 	INTERNAL_PROTO_FILES=$(shell $(Git_Bash) -c "find internal -name *.proto")
 	API_PROTO_FILES=$(shell $(Git_Bash) -c "find api -name *.proto")
@@ -47,7 +43,7 @@ api:
 .PHONY: build
 # build
 build:
-	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./cmd/app
 
 .PHONY: generate
 # generate
@@ -58,9 +54,9 @@ generate:
 .PHONY: all
 # generate all
 all:
-	make api;
-	make config;
-	make generate;
+	make api
+	make config
+	make generate
 
 # show help
 help:
@@ -80,3 +76,4 @@ help:
 	{ lastLine = $$0 }' $(MAKEFILE_LIST)
 
 .DEFAULT_GOAL := help
+
